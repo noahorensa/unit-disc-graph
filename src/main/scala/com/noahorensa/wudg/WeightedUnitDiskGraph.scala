@@ -1,3 +1,4 @@
+package com.noahorensa.wudg
 
 class WeightedUnitDiskGraph(val vertices: Array[Point]) {
 

@@ -1,3 +1,4 @@
+package com.noahorensa.wudg
 
 case class Point(index: Int, x: Double, y: Double) {
 
