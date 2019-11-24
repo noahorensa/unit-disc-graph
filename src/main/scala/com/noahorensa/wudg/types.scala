@@ -15,7 +15,12 @@ case class Point(index: Int, x: Double, y: Double) {
   def slope(other: Point): Double = (y - other.y) / (x - other.x)
 }
 
-case class Edge(s: Point, t:Point) {
+abstract class Edge[T]() {
+  val s: T
+  val t: T
+}
+
+case class WeightedEdge(override val s: Point, override val t: Point) extends Edge[Point] {
 
   def weight: Double = s.dist(t)
 
@@ -42,12 +47,12 @@ case class VertexVisitList(g: WeightedUnitDiskGraph) {
   def unvisitedNeighbors(p: Int): Seq[Point] = g.neighbors(p).filter(pp => ! visited(pp.index))
 }
 
-abstract class Graph() {
-  val V: Seq[Point]
-  val E: Seq[Edge]
+abstract class Graph[T]() {
+  val V: Seq[T]
+  val E: Seq[Edge[T]]
 }
 
-case class GeneralGraph(override val V: Seq[Point], override val E: Seq[Edge]) extends Graph
+case class GeneralGraph[T](override val V: Seq[T], override val E: Seq[Edge[T]]) extends Graph[T]
 
 object types {
   type Triangle = Seq[Point]

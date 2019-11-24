@@ -2,22 +2,22 @@ package com.noahorensa.wudg
 
 import scala.language.implicitConversions
 
-class WeightedUnitDiskGraph(override val V: Seq[Point]) extends Graph {
+class WeightedUnitDiskGraph(override val V: Seq[Point]) extends Graph[Point] {
 
   implicit def pointFromIndex(index: Int): Point = V(index)
 
   implicit def indexFromPoint(point: Point): Int = point.index
 
-  override lazy val E: Seq[Edge] = V.combinations(2)
+  override lazy val E: Seq[WeightedEdge] = V.combinations(2)
     .filter(pair => pair(0).dist(pair(1)) <= 1)
-    .map(pair => Edge(pair(0), pair(1)))
+    .map(pair => WeightedEdge(pair(0), pair(1)))
     .toArray
 
   def verticesExcept(p: Int): Seq[Point] = V.filter(_.index != p)
 
   def neighbors(p: Int): Seq[Point] = verticesExcept(p).filter(_.dist(V(p)) <= 1)
 
-  def edges(p: Int): Seq[Edge] = neighbors(p).map(Edge(V(p), _))
+  def edges(p: Int): Seq[WeightedEdge] = neighbors(p).map(WeightedEdge(V(p), _))
 
   def subset(points: Seq[Int]): Seq[Point] = points.map(V(_))
 
