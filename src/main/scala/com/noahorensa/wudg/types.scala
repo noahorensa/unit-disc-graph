@@ -1,5 +1,7 @@
 package com.noahorensa.wudg
 
+import scala.language.implicitConversions
+
 case class Point(index: Int, x: Double, y: Double) {
 
   override def toString: String = s"$index ($x, $y)"
@@ -9,9 +11,11 @@ case class Point(index: Int, x: Double, y: Double) {
     val diffY = y - other.y
     math.sqrt(diffX * diffX + diffY * diffY)
   }
+
+  def slope(other: Point): Double = (y - other.y) / (x - other.x)
 }
 
-case class WeightedEdge(s: Point, t:Point) {
+case class Edge(s: Point, t:Point) {
 
   def weight: Double = s.dist(t)
 
@@ -29,11 +33,24 @@ case class Path(points: Seq[Point]) {
 
 case class VertexVisitList(g: WeightedUnitDiskGraph) {
 
-  private val visited = g.vertices.map(_ => false)
+  private val visited = g.V.map(_ => false).toArray
 
   def visit(p: Int): Unit = visited(p) = true
 
   def isVisited(p: Int): Boolean = visited(p)
 
-  def unvisitedNeighbors(p: Int): Array[Point] = g.neighbors(p).filter(pp => ! visited(pp.index))
+  def unvisitedNeighbors(p: Int): Seq[Point] = g.neighbors(p).filter(pp => ! visited(pp.index))
+}
+
+abstract class Graph() {
+  val V: Seq[Point]
+  val E: Seq[Edge]
+}
+
+case class GeneralGraph(override val V: Seq[Point], override val E: Seq[Edge]) extends Graph
+
+object types {
+  type Triangle = Seq[Point]
+
+  implicit def tupleToTriangle(points: Tuple3[Point, Point, Point]): Triangle = Seq(points._1, points._2, points._3)
 }
