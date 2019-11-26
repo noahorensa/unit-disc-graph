@@ -1,6 +1,7 @@
 package com.noahorensa.wudg
 
 import scala.language.implicitConversions
+import helpers._
 
 class WeightedUnitDiskGraph(override val V: Seq[Point]) extends Graph[Point] {
 
@@ -11,7 +12,9 @@ class WeightedUnitDiskGraph(override val V: Seq[Point]) extends Graph[Point] {
   override lazy val E: Seq[WeightedEdge] = V.combinations(2)
     .filter(pair => pair(0).dist(pair(1)) <= 1)
     .map(pair => WeightedEdge(pair(0), pair(1)))
-    .toArray
+    .toSeq
+
+  private lazy val H = delaunay(V).filter(_.weight > 1)
 
   def verticesExcept(p: Int): Seq[Point] = V.filter(_.index != p)
 
@@ -59,9 +62,9 @@ class WeightedUnitDiskGraph(override val V: Seq[Point]) extends Graph[Point] {
 }
 
 object WeightedUnitDiskGraph {
-  def apply(vertices: Seq[Point]): WeightedUnitDiskGraph = new WeightedUnitDiskGraph(vertices.toArray)
+  def apply(vertices: Seq[Point]): WeightedUnitDiskGraph = new WeightedUnitDiskGraph(vertices)
 
   def apply(vertices: Int): WeightedUnitDiskGraph = new WeightedUnitDiskGraph(
-    ( for (i <- 0 until vertices) yield Point(i, math.random * 10, math.random * 10) ).toArray
+    ( for (i <- 0 until vertices) yield Point(i, math.random * 10, math.random * 10) )
   )
 }
