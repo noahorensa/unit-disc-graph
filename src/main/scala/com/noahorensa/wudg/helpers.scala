@@ -59,7 +59,7 @@ object helpers {
     (Point(0, s, t), r)
   }
 
-  def delaunay(points: Seq[Point]): Seq[WeightedEdge] = {
+  def delaunay(points: Seq[Point]): Seq[WeightedEdge[Point]] = {
 
     import org.locationtech.jts.geom.{Coordinate, GeometryFactory}
     import org.locationtech.jts.triangulate.DelaunayTriangulationBuilder

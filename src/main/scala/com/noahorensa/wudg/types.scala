@@ -3,7 +3,7 @@ package com.noahorensa.wudg
 
 import scala.language.implicitConversions
 
-case class Point(index: Int, x: Double, y: Double) {
+class Point(val index: Int, val x: Double, val y: Double) {
 
   override def toString: String = s"$index ($x, $y)"
 
@@ -15,8 +15,17 @@ case class Point(index: Int, x: Double, y: Double) {
 
   def slope(other: Point): Double = (y - other.y) / (x - other.x)
 
-  override def equals(o: Any): Boolean =
-    isInstanceOf[Point] && o.asInstanceOf[Point].index == index
+  override def equals(o: Any): Boolean = o match {
+    case p: Point => p.index == index
+    case i: Int => i == index
+    case _ => false
+  }
+
+  override def hashCode(): Int = index
+}
+
+object Point {
+  def apply(index: Int, x: Double, y: Double): Point = new Point(index, x, y)
 }
 
 abstract class Edge[T]() {
@@ -26,7 +35,7 @@ abstract class Edge[T]() {
 
 case class GeneralEdge[T](override val s: T, override val t: T) extends Edge[T]
 
-case class WeightedEdge(override val s: Point, override val t: Point) extends Edge[Point] {
+case class WeightedEdge[T <: Point](override val s: T, override val t: T) extends Edge[T] {
 
   def weight: Double = s.dist(t)
 
@@ -42,20 +51,33 @@ case class Path(points: Seq[Point]) {
   def prepend(point: Point) = Path(point +: points)
 }
 
-case class VertexVisitList(g: WeightedUnitDiskGraph) {
+case class VertexVisitList[T <: Point](g: WeightedUnitDiskGraph[T]) {
 
-  private val visited = g.V.map(_ => false).toArray
+  private val visited = new Array[Boolean](g.V.maxBy(_.index).index + 1)
 
   def visit(p: Int): Unit = visited(p) = true
 
   def isVisited(p: Int): Boolean = visited(p)
 
-  def unvisitedNeighbors(p: Int): Seq[Point] = g.neighbors(p).filter(pp => ! visited(pp.index))
+  def unvisitedNeighbors(p: Int): Seq[T] = g.neighbors(p).filter(pp => ! visited(pp.index))
 }
 
 abstract class Graph[T]() {
   val V: Seq[T]
   val E: Seq[Edge[T]]
+
+  def induceSubgraph(v: Seq[T]): Graph[T] = {
+    val edges = E
+    new Graph[T] {
+      override val V: Seq[T] = v
+      override val E: Seq[Edge[T]] = edges.filter(e => v.contains(e.s) && v.contains(e.t))
+    }
+  }
+
+  def verticesExcept[Z](p: Z): Seq[T] = V.filter(_ != p)
+
+  def verticesExcept[Z](p: Seq[Z]): Seq[T] = V.filter(v => ! p.contains(v))
+
 }
 
 case class GeneralGraph[T](override val V: Seq[T], override val E: Seq[Edge[T]]) extends Graph[T]
